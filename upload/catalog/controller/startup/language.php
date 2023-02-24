@@ -15,18 +15,21 @@ class Language extends \Opencart\System\Engine\Controller {
 		$language_info = $this->model_localisation_language->getLanguageByCode($code);
 
 		if ($language_info) {
+			$this->language = new \Opencart\System\Library\Language($code);
+			
 			// If extension switch add language directory
 			if ($language_info['extension']) {
 				self::$extension = $language_info['extension'];
-
-				$this->language->addPath('extension/' . $language_info['extension'], DIR_EXTENSION . $language_info['extension'] . '/catalog/language/');
+				$this->language->addPath(DIR_EXTENSION . $language_info['extension'] . '/catalog/language/');
+			} else {
+				$this->language->addPath(DIR_LANGUAGE);
 			}
 
 			// Set the config language_id key
 			$this->config->set('config_language_id', $language_info['language_id']);
 			$this->config->set('config_language', $language_info['code']);
 
-			$this->load->language('default');
+			$this->language->load('default');
 		} else {
 			$url_data = $this->request->get;
 
@@ -60,7 +63,7 @@ class Language extends \Opencart\System\Engine\Controller {
 
 		// Use load->language so it's not triggering infinite loops
 		if (oc_substr($route, 0, 10) != 'extension/' && self::$extension) {
-			$this->load->language('extension/' . self::$extension . '/' . $route, $prefix, $language);
+			$this->language->load('extension/' . self::$extension . '/' . $route, $prefix, $language);
 		}
 	}
 }
