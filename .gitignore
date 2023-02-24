@@ -42,3 +42,8 @@
 /upload/.idea/*
 /.idea/*
 /.DS_Store
+
+# Custom extension
+/upload/extension/*
+!/upload/extension/opencart
+!/upload/extension/oc_payment_example
