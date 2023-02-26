@@ -31,7 +31,6 @@ class Subscription extends \Opencart\System\Engine\Model {
 		`remaining` = '" . (int)$data['remaining'] . "', 
 		`date_next` = '" . $this->db->escape($data['date_next']) . "', 
 		`comment` = '" . $this->db->escape($data['comment']) . "', 
-		`subscription_status_id` = '" . (int)$data['subscription_status_id'] . "', 
 		`affiliate_id` = '" . (int)$data['affiliate_id'] . "', 
 		`commission` = '" . (float)$data['commission'] . "', 
 		`marketing_id` = '" . (int)$data['marketing_id'] . "', 
@@ -78,7 +77,6 @@ class Subscription extends \Opencart\System\Engine\Model {
 		`remaining` = '" . (int)$data['remaining'] . "', 
 		`date_next` = '" . $this->db->escape($data['date_next']) . "', 
 		`comment` = '" . $this->db->escape($data['comment']) . "', 
-		`subscription_status_id` = '" . (int)$data['subscription_status_id'] . "', 
 		`affiliate_id` = '" . (int)$data['affiliate_id'] . "', 
 		`commission` = '" . (float)$data['commission'] . "', 
 		`marketing_id` = '" . (int)$data['marketing_id'] . "', 
@@ -97,7 +95,7 @@ class Subscription extends \Opencart\System\Engine\Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "subscription` WHERE `order_id` = '" . (int)$order_id . "'");
 	}
 
-	public function getSubscriptionByOrderProductId(int $order_product_id): array {
+	public function getSubscriptionByOrderProductId(int $order_id, int $order_product_id): array {
 		$this->db->query("SELECT * FROM  `" . DB_PREFIX . "subscription` WHERE `order_product_id` = '" . (int)$order_product_id . "'");
 
 		return $this->db->row;
