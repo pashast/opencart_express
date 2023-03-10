@@ -36,6 +36,7 @@ class Header extends \Opencart\System\Engine\Controller {
 		$data['links'] = $this->document->getLinks();
 		$data['styles'] = $this->document->getStyles();
 		$data['scripts'] = $this->document->getScripts('header');
+		$data['metas'] = $this->document->getMetas();
 
 		$data['name'] = $this->config->get('config_name');
 
