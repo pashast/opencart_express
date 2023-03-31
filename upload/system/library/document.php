@@ -18,7 +18,6 @@ class Document {
 	private array $links = [];
 	private array $styles = [];
 	private array $scripts = [];
-	private array $meta = [];
 
 	/**
      *
@@ -120,24 +119,6 @@ class Document {
      */
 	public function getStyles(): array {
 		return $this->styles;
-	}
-
-	/**
-	 *
-	 *
-	 * @param string $content
-	 */
-	public function setMeta(string $content): void {
-		$this->meta[] = $content;
-	}
-
-	/**
-	 *
-	 *
-	 * @return	array
-	 */
-	public function getMetas(): array {
-		return $this->meta;
 	}
 
 	/**
