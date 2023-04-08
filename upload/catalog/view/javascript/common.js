@@ -98,7 +98,7 @@ $(document).ready(function() {
     // Alert Fade
     var oc_alert = function() {
         window.setTimeout(function() {
-            $('.alert-dismissible').fadeTo(1000, 0, function() {
+            $('.alert-dismissible').fadeTo(3000, 0, function() {
                 $(this).remove();
             });
         }, 3000);
@@ -548,8 +548,12 @@ $(document).ready(function() {
         $.fn.button = function(state) {
             return this.each(function() {
                 var element = this;
+                var disabled = $(element).prop('disabled');
 
                 $.extend(this, state);
+
+                console.log(state);
+                console.log(disabled);
 
                 if (state == 'loading') {
                     this.html = $(element).html();
