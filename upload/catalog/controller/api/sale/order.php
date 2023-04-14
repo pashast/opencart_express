@@ -64,7 +64,7 @@ class Order extends \Opencart\System\Engine\Controller {
 
 			$this->session->data['payment_method'] = $order_info['payment_method'];
 
-			if ($order_info['shipping_code']) {
+			if ($order_info['shipping_method']) {
 				$this->session->data['shipping_address'] = [
 					'shipping_address_id' => $order_info['shipping_address_id'],
 					'firstname'           => $order_info['shipping_firstname'],
@@ -113,7 +113,15 @@ class Order extends \Opencart\System\Engine\Controller {
 					}
 				}
 
-				$this->cart->add($product['product_id'], $product['quantity'], $option_data);
+				$subscription_info = $this->model_checkout_order->getSubscription($order_id, $product['order_product_id']);
+
+				if ($subscription_info) {
+					$subscription_plan_id = $subscription_info['subscription_plan_id'];
+				} else {
+					$subscription_plan_id = 0;
+				}
+
+				$this->cart->add($product['product_id'], $product['quantity'], $option_data, $subscription_plan_id);
 			}
 
 			$this->session->data['vouchers'] = [];
@@ -345,13 +353,30 @@ class Order extends \Opencart\System\Engine\Controller {
 					];
 				}
 
+				$subscription_data = [];
+
+				if ($product['subscription']) {
+					$subscription_data = [
+						'subscription_plan_id' => $product['subscription']['subscription_plan_id'],
+						'name'                 => $product['subscription']['name'],
+						'trial_frequency'      => $product['subscription']['trial_frequency'],
+						'trial_cycle'          => $product['subscription']['trial_cycle'],
+						'trial_duration'       => $product['subscription']['trial_duration'],
+						'trial_remaining'      => $product['subscription']['trial_remaining'],
+						'trial_status'         => $product['subscription']['trial_status'],
+						'frequency'            => $product['subscription']['frequency'],
+						'cycle'                => $product['subscription']['cycle'],
+						'duration'             => $product['subscription']['duration']
+					];
+				}
+
 				$order_data['products'][] = [
 					'product_id'   => $product['product_id'],
 					'master_id'    => $product['master_id'],
 					'name'         => $product['name'],
 					'model'        => $product['model'],
 					'option'       => $option_data,
-					'subscription' => $product['subscription'],
+					'subscription' => $subscription_data,
 					'download'     => $product['download'],
 					'quantity'     => $product['quantity'],
 					'subtract'     => $product['subtract'],
