@@ -446,6 +446,13 @@ var chain = new Chain();
                 element.request();
             });
 
+            // Focus out
+            $(element).on('focusout', function (e) {
+                if (!e.relatedTarget || !$(e.relatedTarget).hasClass('dropdown-item')) {
+                    $dropdown.removeClass('show');
+                }
+            });
+
             // Input
             $(element).on('input', function (e) {
                 element.request();
@@ -459,6 +466,8 @@ var chain = new Chain();
 
                 if (element.items[value] !== undefined) {
                     element.select(element.items[value]);
+
+                    $dropdown.removeClass('show');
                 }
             });
 
@@ -469,6 +478,7 @@ var chain = new Chain();
                 $('#autocomplete-loading').remove();
 
                 $dropdown.prepend('<li id="autocomplete-loading"><span class="dropdown-item text-center disabled"><i class="fa-solid fa-circle-notch fa-spin"></i></span></li>');
+                $dropdown.addClass('show');
 
                 this.timer = setTimeout(function (object) {
                     object.source($(object).val(), $.proxy(object.response, object));
