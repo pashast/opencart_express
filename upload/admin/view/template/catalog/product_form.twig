@@ -543,6 +543,7 @@
                 <label class="col-sm-2 col-form-label">{{ entry_manufacturer }}</label>
                 <div class="col-sm-10">
                   <div class="input-group">
+                    <input type="hidden" name="manufacturer_id" value="{{ manufacturer_id }}" id="input-manufacturer-id"/>
                     <input type="text" name="manufacturer" value="{{ manufacturer }}" placeholder="{{ entry_manufacturer }}" id="input-manufacturer" data-bs-toggle="dropdown" data-bs-target="#autocomplete-manufacturer" data-oc-target="autocomplete-manufacturer" class="form-control" autocomplete="off"/>
                     <ul id="autocomplete-manufacturer" class="dropdown-menu"></ul>
                     {% if master_id %}
