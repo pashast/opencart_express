@@ -543,7 +543,8 @@
                 <label class="col-sm-2 col-form-label">{{ entry_manufacturer }}</label>
                 <div class="col-sm-10">
                   <div class="input-group">
-                    <input type="text" name="manufacturer" value="{{ manufacturer }}" placeholder="{{ entry_manufacturer }}" id="input-manufacturer" data-bs-toggle="dropdown" data-oc-target="autocomplete-manufacturer" class="form-control" autocomplete="off"/>
+                    <input type="text" name="manufacturer" value="{{ manufacturer }}" placeholder="{{ entry_manufacturer }}" id="input-manufacturer" data-bs-toggle="dropdown" data-bs-target="#autocomplete-manufacturer" data-oc-target="autocomplete-manufacturer" class="form-control" autocomplete="off"/>
+                    <ul id="autocomplete-manufacturer" class="dropdown-menu"></ul>
                     {% if master_id %}
                       <div class="input-group-text">
                         <div class="form-check form-switch">
@@ -553,8 +554,6 @@
                       </div>
                     {% endif %}
                   </div>
-                  <input type="hidden" name="manufacturer_id" value="{{ manufacturer_id }}" id="input-manufacturer-id"/>
-                  <ul id="autocomplete-manufacturer" class="dropdown-menu"></ul>
                   <div class="form-text">{{ help_manufacturer }}</div>
                 </div>
               </div>
