@@ -30,17 +30,26 @@ class Subscription extends \Opencart\System\Engine\Controller {
 				// 1. Language
 				$this->load->model('localisation/language');
 
-				$language_info = $this->model_localisation_language->getLanguage($order_info['language_code']);
+				$language_info = $this->model_localisation_language->getLanguage($result['language_id']);
 
 				if (!$language_info) {
 					$error = $this->language->get('error_language');
 				}
 
-				// 1. create new instance of a store
+				// 2. Currency
+				$this->load->model('localisation/currency');
+
+				$currency_info = $this->model_localisation_currency->getCurrency($result['currency_id']);
+
+				if (!$currency_info) {
+					$error = $this->language->get('error_currency');
+				}
+
+				// 3. Create new instance of a store
 				if (!$error) {
 					$store = $this->model_setting_store->createStoreInstance($result['store_id'], $language_info['code']);
 
-					// 2. Login
+					// Login
 					$this->load->model('account/customer');
 
 					$customer_info = $this->model_account_customer->getCustomer($result['customer_id']);
@@ -61,7 +70,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 					}
 				}
 
-				// 3. Add product
+				// 4. Add product
 				if (!$error) {
 					$this->load->model('catalog/product');
 
@@ -90,14 +99,14 @@ class Subscription extends \Opencart\System\Engine\Controller {
 					}
 				}
 
-				// 4. Add Shipping Address
+				// 5. Add Shipping Address
 				if (!$error && $store->cart->hasShipping()) {
 					$this->load->model('account/address');
 
 					$shipping_address_info = $this->model_account_address->getAddress($result['customer_id'], $result['shipping_address_id']);
 
 					if ($shipping_address_info) {
-						$this->session->data['shipping_address'] = $shipping_address_info;
+						$store->session->data['shipping_address'] = $shipping_address_info;
 					} else {
 						$error = $this->language->get('error_shipping_address');
 					}
@@ -113,7 +122,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 							$shipping = explode('.', $order_info['shipping_method']['code']);
 
 							if (isset($shipping[0]) && isset($shipping[1]) && isset($shipping_methods[$shipping[0]]['quote'][$shipping[1]])) {
-								$this->session->data['shipping_method'] = $shipping_methods[$shipping[0]]['quote'][$shipping[1]];
+								$store->session->data['shipping_method'] = $shipping_methods[$shipping[0]]['quote'][$shipping[1]];
 							} else {
 								$error = $this->language->get('error_shipping_method');
 							}
@@ -132,7 +141,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 					$payment_address_info = $this->model_account_address->getAddress($order_info['customer_id'], $result['payment_address_id']);
 
 					if ($payment_address_info) {
-						$this->session->data['payment_address'] = $payment_address_info;
+						$store->session->data['payment_address'] = $payment_address_info;
 					} else {
 						$error = $this->language->get('error_payment_address');
 					}
@@ -149,7 +158,7 @@ class Subscription extends \Opencart\System\Engine\Controller {
 						$payment = explode('.', $order_info['payment_method']['code']);
 
 						if (isset($payment[0]) && isset($payment[1]) && isset($payment_methods[$payment[0]]['option'][$payment[1]])) {
-							$this->session->data['payment_method'] = $payment_methods[$payment[0]]['option'][$payment[1]];
+							$store->session->data['payment_method'] = $payment_methods[$payment[0]]['option'][$payment[1]];
 						} else {
 							$error = $this->language->get('error_payment_method');
 						}
@@ -158,15 +167,25 @@ class Subscription extends \Opencart\System\Engine\Controller {
 					}
 				}
 
+
+				if (!$error) {
+					$this->load->model('marketing/marketing');
+
+					$marketing_info = $this->model_marketing_marketing->getMarketingByCode($this->session->data['tracking']);
+					$order_data['language_id'] = $this->config->get('config_language_id');
+				}
+
+
+
 				if (!$error) {
 					// Subscription
-					$order_data['subscription_id'] = $order_info['invoice_prefix'];
+					$order_data['subscription_id'] = $order_info['subscription_id'];
 
 					// Store Details
 					$order_data['invoice_prefix'] = $order_info['invoice_prefix'];
 					$order_data['store_id'] = $order_info['store_id'];
-					$order_data['store_name'] = $this->config->get('config_name');
-					$order_data['store_url'] = $this->config->get('config_url');
+					$order_data['store_name'] = $order_info['store_name'];
+					$order_data['store_url'] = $order_info['store_url'];
 
 					// Customer Details
 					$order_data['customer_id'] = $customer_info['customer_id'];
@@ -285,24 +304,76 @@ class Subscription extends \Opencart\System\Engine\Controller {
 							'reward'       => $product['reward']
 						];
 					}
-				}
 
-				// Order Totals
-				$totals = [];
-				$taxes = $store->cart->getTaxes();
-				$total = 0;
+					// Vouchers can not be in subscriptions
+					$order_data['vouchers'] = [];
 
-				$store->load->model('checkout/cart');
+					// Order Totals
+					$totals = [];
+					$taxes = $store->cart->getTaxes();
+					$total = 0;
 
-				($store->model_checkout_cart->getTotals)($totals, $taxes, $total);
+					$store->load->model('checkout/cart');
 
-				$order_data['totals'] = [];
+					($store->model_checkout_cart->getTotals)($totals, $taxes, $total);
 
-				foreach ($totals as $total) {
-					$order_data['totals'][] = [
-						'title' => $total['title'],
-						'text'  => $store->currency->format($total['value'], $this->session->data['currency'])
+					$total_data = [
+						'totals' => $totals,
+						'taxes' => $taxes,
+						'total' => $total
 					];
+
+					$order_data = array_merge($order_data, $total_data);
+
+					$order_data['affiliate_id'] = 0;
+					$order_data['commission'] = 0;
+					$order_data['marketing_id'] = 0;
+					$order_data['tracking'] = '';
+
+					if (isset($this->session->data['tracking'])) {
+						$subtotal = $this->cart->getSubTotal();
+
+						// Affiliate
+						if ($this->config->get('config_affiliate_status')) {
+							$this->load->model('account/affiliate');
+
+							$affiliate_info = $this->model_account_affiliate->getAffiliateByTracking($this->session->data['tracking']);
+
+							if ($affiliate_info) {
+								$order_data['affiliate_id'] = $affiliate_info['customer_id'];
+								$order_data['commission'] = ($subtotal / 100) * $affiliate_info['commission'];
+								$order_data['tracking'] = $this->session->data['tracking'];
+							}
+						}
+
+						$this->load->model('marketing/marketing');
+
+						$marketing_info = $this->model_marketing_marketing->getMarketingByCode($this->session->data['tracking']);
+
+						if ($marketing_info) {
+							$order_data['marketing_id'] = $marketing_info['marketing_id'];
+						}
+					}
+
+
+					// Language
+					$order_data['language_id'] = $language_info['language_id'];
+					$order_data['language_code'] = $language_info['code'];
+
+					// Currency
+					$order_data['currency_id'] = $currency_info['currency_id'];
+					$order_data['currency_code'] = $currency_info['code'];
+					$order_data['currency_value'] = $currency_info['value'];
+
+
+					$order_data['ip'] = $result['ip'];
+					$order_data['forwarded_ip'] = $result['forwarded_ip'];
+					$order_data['user_agent'] = $result['user_agent'];
+					$order_data['accept_language'] = $result['accept_language'];
+
+
+
+
 				}
 
 
