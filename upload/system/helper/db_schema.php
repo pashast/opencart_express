@@ -525,6 +525,16 @@ function oc_db_schema() {
 				'not_null' => true
 			],
 			[
+				'name' => 'override',
+				'type' => 'tinyint(1)',
+				'not_null' => true
+			],
+			[
+				'name' => 'price',
+				'type' => 'decimal(15,4)',
+				'not_null' => true
+			],
+			[
 				'name' => 'date_added',
 				'type' => 'datetime',
 				'not_null' => true
@@ -4433,13 +4443,13 @@ function oc_db_schema() {
 				'not_null' => true
 			],
 			[
-				'name' => 'name',
-				'type' => 'varchar(255)',
+				'name' => 'trial_price',
+				'type' => 'decimal(10,4)',
 				'not_null' => true
 			],
 			[
-				'name' => 'trial_price',
-				'type' => 'decimal(10,4)',
+				'name' => 'trial_tax',
+				'type' => 'decimal(15,4)',
 				'not_null' => true
 			],
 			[
@@ -4470,6 +4480,11 @@ function oc_db_schema() {
 			[
 				'name' => 'price',
 				'type' => 'decimal(10,4)',
+				'not_null' => true
+			],
+			[
+				'name' => 'tax',
+				'type' => 'decimal(15,4)',
 				'not_null' => true
 			],
 			[
@@ -6492,11 +6507,6 @@ function oc_db_schema() {
 				'not_null' => true
 			],
 			[
-				'name' => 'name',
-				'type' => 'varchar(255)',
-				'not_null' => true
-			],
-			[
 				'name' => 'trial_price',
 				'type' => 'decimal(10,4)',
 				'not_null' => true
@@ -6729,11 +6739,6 @@ function oc_db_schema() {
 				'type' => 'int(11)',
 				'not_null' => true,
 				'auto_increment' => true
-			],
-			[
-				'name' => 'trial_price',
-				'type' => 'decimal(10,4)',
-				'not_null' => true
 			],
 			[
 				'name' => 'trial_frequency',
